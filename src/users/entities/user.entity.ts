@@ -23,33 +23,33 @@ export class User {
   @Column()
   email: string;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   profile_photo: string;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   access_token: string;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   refresh_token: string;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   device_token: string;
 
-  @Column()
+  @Column({ default: false })
   isOnline: boolean;
 
-  @Column()
+  @Column({ default: () => 'CURRENT_TIMESTAMP' })
   lastSeen: Date;
 
-  @Column()
+  @Column({ nullable: true, default: null })
   about: string;
 
   @Column()
   password: string;
 
-  @CreateDateColumn()
+  @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 }
