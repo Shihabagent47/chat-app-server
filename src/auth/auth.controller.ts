@@ -1,11 +1,15 @@
-import { Controller, Post, Body, UseGuards } from '@nestjs/common';
+import { Controller, Post, Body, UseGuards, Get } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { Public } from './decorators/public .decorator';
 import { RegisterDto } from './dto/register.dto';
 import { User } from 'src/users/entities/user.entity';
 import { LoginDto } from './dto/login.dot';
 import { LocalAuthGuard } from './guards/local-auth.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.gurd';
+import { CurrentUser } from './decorators/current-user.decorator';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
+@ApiTags('auth')
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
@@ -23,9 +27,22 @@ export class AuthController {
     return this.authService.login(loginDto);
   }
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBearerAuth('JWT-auth')
+  getProfile(@CurrentUser() user: User) {
+    return user;
+  }
+
   @Public()
   @Post('refresh')
   async refreshToken(@Body() user: User): Promise<any> {
     return this.authService.refreshToken(user);
+  }
+
+  @Public()
+  @Post('logout')
+  async logout(@Body() user: User): Promise<any> {
+    return this.authService.logout(user);
   }
 }

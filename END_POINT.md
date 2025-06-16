@@ -1,4 +1,5 @@
 # Auth Endpoints
+
 - POST /auth/register
 - POST /auth/login
 - POST /auth/refresh
@@ -7,6 +8,7 @@
 - PUT  /auth/profile
 
 # User Management
+
 - GET    /users/search?q={query}
 - GET    /users/{userId}
 - PUT    /users/{userId}
@@ -14,6 +16,7 @@
 - DELETE /users/{userId}/block
 
 # Conversations
+
 - GET    /conversations
 - POST   /conversations
 - GET    /conversations/{conversationId}
@@ -23,6 +26,7 @@
 - DELETE /conversations/{conversationId}/participants/{userId}
 
 # Messages
+
 - GET    /conversations/{conversationId}/messages
 - POST   /conversations/{conversationId}/messages
 - PUT    /messages/{messageId}
@@ -31,6 +35,7 @@
 
 
 # Client to Server Events
+
 // Connection events
 - 'authenticate' -> { token: string }
 - 'join_conversation' -> { conversationId: string }
@@ -50,6 +55,7 @@
 
 
 # Server to Client Events
+
 // Message events
 - 'message_received' -> { message, conversation }
 - 'message_updated' -> { messageId, content, editedAt }
