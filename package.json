@@ -21,7 +21,9 @@
     "migration:generate": "typeorm-ts-node-commonjs migration:generate -d typeorm.config.ts",
     "migration:run": "typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
-    "migration:show": "typeorm-ts-node-commonjs migration:show -d typeorm.config.ts"
+    "migration:show": "typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
+    "reset:db": "typeorm-ts-node-commonjs schema:drop -d typeorm.config.ts && typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
+    "reset": "npm run migration:revert && npm run migration:run"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

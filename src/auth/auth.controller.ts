@@ -5,7 +5,7 @@ import { RegisterDto } from './dto/register.dto';
 import { User } from 'src/users/entities/user.entity';
 import { LoginDto } from './dto/login.dot';
 import { LocalAuthGuard } from './guards/local-auth.guard';
-import { JwtAuthGuard } from './guards/jwt-auth.gurd';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
