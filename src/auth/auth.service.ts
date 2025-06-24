@@ -15,7 +15,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async login(loginDto: LoginDto): Promise<any> {
     const user = await this.userRepository.findOne({
@@ -42,9 +42,19 @@ export class AuthService {
     });
 
     return {
-      'message': 'Login successful',
+      message: 'Login successful',
       access_token: accessToken,
       refresh_token: refreshToken,
+    };
+  }
+
+  async logout(user: User): Promise<any> {
+    await this.userRepository.update(user.id, {
+      access_token: '',
+      refresh_token: '',
+    });
+    return {
+      message: 'Logout successful',
     };
   }
 
