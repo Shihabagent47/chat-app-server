@@ -5,14 +5,17 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
+import { FileUploadService } from 'src/common/files/fire-upload.service';
+import { File } from 'multer';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private fileUploadService: FileUploadService,
   ) { }
 
-  async findOne(id: string): Promise<User | null> {
+  async findById(id: string): Promise<User | null> {
     const user = await this.userRepository.findOne({
       where: { id },
     });
@@ -39,6 +42,7 @@ export class UsersService {
         phone: true,
         email: true,
         about: true,
+        profile_photo: true,
       },
       where: whereCondition,
       skip: skip,
@@ -52,7 +56,7 @@ export class UsersService {
     userId: string,
     updateStatusDto: UpdateStatusDto,
   ): Promise<any> {
-    const user = await this.findOne(userId);
+    const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -67,7 +71,7 @@ export class UsersService {
     userId: string,
     updateProfileDto: UpdateProfileDto,
   ): Promise<any> {
-    const user = await this.findOne(userId);
+    const user = await this.findById(userId);
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -78,5 +82,51 @@ export class UsersService {
     return this.userRepository.save(user);
   }
 
+  async uploadProfilePicture(userId: string, file: File): Promise<string> {
+    const user = await this.findById(userId);
 
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    // Delete old profile picture if exists
+    if (user.profile_photo) {
+      await this.fileUploadService.deleteFile(user.profile_photo);
+    }
+
+    // Upload new profile picture
+    const profilePictureUrl = await this.fileUploadService.uploadProfilePicture(
+      userId,
+      file,
+      {
+        resize: { width: 400, height: 400 }, // Resize to 400x400
+        quality: 80,
+      },
+    );
+
+    // Update user record
+    user.profile_photo = profilePictureUrl;
+    user.updatedAt = new Date();
+    await this.userRepository.save(user);
+
+    return profilePictureUrl;
+  }
+
+  async removeProfilePicture(userId: string): Promise<void> {
+    const user = await this.findById(userId);
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    if (user.profile_photo) {
+      // Delete file from storage
+      await this.fileUploadService.deleteFile(user.profile_photo);
+
+      // Update user record
+      user.profile_photo = '';
+      user.updatedAt = new Date();
+      await this.userRepository.save(user);
+    }
+  }
 }

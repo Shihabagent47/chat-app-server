@@ -7,9 +7,15 @@ import { ConfigModule } from '@nestjs/config';
 import { DatabaseModule } from './config/database.module';
 import { configValidationSchema } from './config/validation.schema';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
-
+import { ServeStaticModule } from '@nestjs/serve-static';
+import { join } from 'path';
 @Module({
   imports: [
+    ServeStaticModule.forRoot({
+      rootPath: join(__dirname, '..', '..', 'public'),
+      serveRoot: '/',
+    }),
+
     ConfigModule.forRoot({
       isGlobal: true,
       validationSchema: configValidationSchema,
