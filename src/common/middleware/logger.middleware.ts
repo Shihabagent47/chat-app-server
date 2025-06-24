@@ -7,9 +7,11 @@ export class LoggerMiddleware implements NestMiddleware {
     const timestamp = new Date().toISOString();
     res.on('finish', () => {
       const { statusCode } = res;
+
       console.log(`[${timestamp}] ${method} ${originalUrl} ${statusCode}`);
       console.log(`Query Params: ${JSON.stringify(query)}`);
       console.log(`Body: ${JSON.stringify(body)}`);
+      console.log('----------------------------');
     });
     next();
   }
