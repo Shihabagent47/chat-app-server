@@ -103,6 +103,16 @@ Once the application is running, you can access the Swagger API documentation at
 http://localhost:3000/api-docs
 ```
 
+### Swagger UI Preview
+
+![Swagger API Documentation](docs/images/swagger-api-documentation.png)
+
+The interactive API documentation provides:
+- Complete endpoint documentation
+- Request/response schemas
+- Authentication examples
+- Try-it-out functionality for testing endpoints
+
 ## WebSocket Events
 
 The application supports real-time communication through WebSocket events. See [END_POINT.md](END_POINT.md) for details on available events.
@@ -116,6 +126,15 @@ src/
 ├── config/         # Configuration files
 ├── migrations/     # Database migrations
 └── main.ts         # Application entry point
+
+docs/
+└── images/         # Documentation images and screenshots
+
+public/
+└── uploads/        # User uploaded files (profile pictures, attachments)
+    ├── profile-pictures/
+    ├── attachments/
+    └── thumbnails/
 ```
 
 ## License
