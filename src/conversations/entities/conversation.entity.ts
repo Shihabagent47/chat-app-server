@@ -4,7 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  ManyToOne,
+  OneToMany,
+  JoinColumn,
 } from 'typeorm';
+import { User } from '../../users/entities/user.entity';
+import { Message } from '../../messages/entities/message.entity';
+import { Participant } from '../../users/entities/participants.entity';
 
 export enum ConversationType {
   GROUP = 'group',
@@ -33,4 +39,15 @@ export class Conversation {
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
+
+  // Relationships
+  @ManyToOne(() => User, (user) => user.createdConversations)
+  @JoinColumn({ name: 'createdBy' })
+  creator: User;
+
+  @OneToMany(() => Message, (message) => message.conversation)
+  messages: Message[];
+
+  @OneToMany(() => Participant, (participant) => participant.conversation)
+  participants: Participant[];
 }

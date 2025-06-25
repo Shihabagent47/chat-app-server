@@ -3,7 +3,11 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { User } from './user.entity';
+import { Conversation } from '../../conversations/entities/conversation.entity';
 
 export enum ParticipantRole {
   ADMIN = 'admin',
@@ -29,4 +33,13 @@ export class Participant {
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  // Relationships
+  @ManyToOne(() => User, (user) => user.participations)
+  @JoinColumn({ name: 'userId' })
+  user: User;
+
+  @ManyToOne(() => Conversation, (conversation) => conversation.participants)
+  @JoinColumn({ name: 'conversationId' })
+  conversation: Conversation;
 }

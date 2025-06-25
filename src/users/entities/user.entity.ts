@@ -4,7 +4,12 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
+import { Message } from '../../messages/entities/message.entity';
+import { MessageRead } from '../../messages/entities/message_reads.entity';
+import { Participant } from './participants.entity';
+import { Conversation } from '../../conversations/entities/conversation.entity';
 
 @Entity()
 export class User {
@@ -52,4 +57,17 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
+
+  // Relationships
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => MessageRead, (messageRead) => messageRead.user)
+  messageReads: MessageRead[];
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  participations: Participant[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.creator)
+  createdConversations: Conversation[];
 }

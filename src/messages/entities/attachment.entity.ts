@@ -3,7 +3,10 @@ import {
   Entity,
   PrimaryGeneratedColumn,
   CreateDateColumn,
+  ManyToOne,
+  JoinColumn,
 } from 'typeorm';
+import { Message } from './message.entity';
 
 @Entity()
 export class Attachment {
@@ -30,4 +33,9 @@ export class Attachment {
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   createdAt: Date;
+
+  // Relationships
+  @ManyToOne(() => Message, (message) => message.attachments)
+  @JoinColumn({ name: 'messageId' })
+  message: Message;
 }
