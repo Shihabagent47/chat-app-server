@@ -16,7 +16,9 @@ export enum ParticipantRole {
 }
 
 @Entity()
-@Index('IDX_PARTICIPANT_USER_CONVERSATION', ['userId', 'conversationId'], { unique: true })
+@Index('IDX_PARTICIPANT_USER_CONVERSATION', ['userId', 'conversationId'], {
+  unique: true,
+})
 @Index('IDX_PARTICIPANT_CONVERSATION_ROLE', ['conversationId', 'role'])
 export class Participant {
   @PrimaryGeneratedColumn('uuid')

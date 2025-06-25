@@ -11,7 +11,9 @@ import { Message } from './message.entity';
 import { User } from '../../users/entities/user.entity';
 
 @Entity()
-@Index('IDX_MESSAGE_READ_MESSAGE_USER', ['messageId', 'userId'], { unique: true })
+@Index('IDX_MESSAGE_READ_MESSAGE_USER', ['messageId', 'userId'], {
+  unique: true,
+})
 @Index('IDX_MESSAGE_READ_USER_READ_AT', ['userId', 'readAt'])
 export class MessageRead {
   @PrimaryGeneratedColumn('uuid')
