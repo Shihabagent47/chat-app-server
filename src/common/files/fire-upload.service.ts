@@ -57,7 +57,6 @@ export class FileUploadService {
     file: File,
     options?: UploadOptions,
   ): Promise<string> {
-
     if (!file || !file.mimetype) {
       throw new BadRequestException('No file uploaded');
     }
@@ -72,7 +71,6 @@ export class FileUploadService {
     const uploadPath = path.join(this.uploadDir, 'profile-pictures', fileName);
 
     try {
-
       // Process and save image
       if (this.isImageFile(file.mimetype)) {
         await this.processAndSaveImage(file.buffer, uploadPath, options);
