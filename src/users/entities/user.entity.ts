@@ -4,7 +4,13 @@ import {
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
+  Index,
 } from 'typeorm';
+import { Message } from '../../messages/entities/message.entity';
+import { MessageRead } from '../../messages/entities/message_reads.entity';
+import { Participant } from './participants.entity';
+import { Conversation } from '../../conversations/entities/conversation.entity';
 
 @Entity()
 export class User {
@@ -18,9 +24,11 @@ export class User {
   lastName: string;
 
   @Column()
+  @Index('IDX_USER_PHONE')
   phone: string;
 
   @Column()
+  @Index('IDX_USER_EMAIL', { unique: true })
   email: string;
 
   @Column({ nullable: true, default: null })
@@ -36,9 +44,11 @@ export class User {
   device_token: string;
 
   @Column({ default: false })
+  @Index('IDX_USER_IS_ONLINE')
   isOnline: boolean;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Index('IDX_USER_LAST_SEEN')
   lastSeen: Date;
 
   @Column({ nullable: true, default: null })
@@ -52,4 +62,17 @@ export class User {
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
+
+  // Relationships
+  @OneToMany(() => Message, (message) => message.sender)
+  sentMessages: Message[];
+
+  @OneToMany(() => MessageRead, (messageRead) => messageRead.user)
+  messageReads: MessageRead[];
+
+  @OneToMany(() => Participant, (participant) => participant.user)
+  participations: Participant[];
+
+  @OneToMany(() => Conversation, (conversation) => conversation.creator)
+  createdConversations: Conversation[];
 }
