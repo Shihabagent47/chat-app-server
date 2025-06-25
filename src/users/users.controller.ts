@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
-import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
+
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
@@ -22,26 +22,45 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { profilePictureMulterConfig } from 'src/common/files/multer.config';
 import { File } from 'multer';
 import { FileUploadService } from '../common/files/fire-upload.service';
-import { ApiConsumes, ApiBody } from '@nestjs/swagger';
+import {
+  ApiConsumes,
+  ApiBody,
+  ApiOperation,
+  ApiBearerAuth,
+  ApiOkResponse,
+  ApiTags,
+} from '@nestjs/swagger';
+import { ApiResponseDto } from 'src/common/dto/api-response.dto';
+import { User } from './entities/user.entity';
 @ApiTags('users')
 @Controller('users')
 export class UsersController {
   constructor(
     private readonly userService: UsersService,
     private readonly fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
   @Get('')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  async findAll(@Query() query: GetUsersQueryDto): Promise<any> {
+  @ApiOperation({ summary: 'Get all users with pagination' })
+  @ApiOkResponse({
+    description: 'Users retrieved successfully',
+    type: ApiResponseDto<User[]>,
+  })
+  async findAll(@Query() query: GetUsersQueryDto) {
     return this.userService.findAll(query);
   }
 
   @Get(':id')
   @UseGuards(JwtAuthGuard)
   @ApiBearerAuth('JWT-auth')
-  async findOne(@Param('id') id: string): Promise<any> {
+  @ApiOperation({ summary: 'Get single user by id' })
+  @ApiOkResponse({
+    description: 'Users retrieved successfully',
+    type: ApiResponseDto<User>,
+  })
+  async findById(@Param('id') id: string) {
     return this.userService.findById(id);
   }
 
@@ -85,7 +104,6 @@ export class UsersController {
     if (!file) {
       throw new BadRequestException('No file uploaded');
     }
-
 
     // Update user record
 

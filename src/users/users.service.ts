@@ -13,25 +13,25 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
-  async findById(id: string): Promise<User | null> {
+  async findById(id: string) {
     const user = await this.userRepository.findOne({
       where: { id },
     });
     return user;
   }
 
-  async findAll(query: GetUsersQueryDto): Promise<any> {
+  async findAll(query: GetUsersQueryDto) {
     const pageSize = query.limit ?? 10;
     const page = query.page ?? 1;
     const skip = (page - 1) * pageSize;
     const whereCondition = query.q
       ? [
-        {
-          phone: Like(`%${query.q}%`),
-        },
-      ]
+          {
+            phone: Like(`%${query.q}%`),
+          },
+        ]
       : {};
 
     const [users, totalUsers] = await this.userRepository.findAndCount({
