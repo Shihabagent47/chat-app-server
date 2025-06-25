@@ -54,3 +54,14 @@ pids
 
 # Diagnostic reports (https://nodejs.org/api/report.html)
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
+
+# User uploaded files (exclude from git)
+public/uploads/*
+# But keep the directory structure
+!public/uploads/.gitkeep
+!public/uploads/profile-pictures/.gitkeep
+!public/uploads/attachments/.gitkeep
+!public/uploads/thumbnails/.gitkeep
+
+# Test files
+test-*.js
