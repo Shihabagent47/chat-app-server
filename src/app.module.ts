@@ -9,6 +9,8 @@ import { configValidationSchema } from './config/validation.schema';
 import { LoggerMiddleware } from './common/middleware/logger.middleware';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
+import { ConversationsModule } from './conversations/conversations.module';
+import { MessagesModule } from './messages/messages.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -23,6 +25,8 @@ import { join } from 'path';
     DatabaseModule,
     UsersModule,
     AuthModule,
+    ConversationsModule,
+    MessagesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
