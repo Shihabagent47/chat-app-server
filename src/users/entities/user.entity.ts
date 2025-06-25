@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   UpdateDateColumn,
   OneToMany,
+  Index,
 } from 'typeorm';
 import { Message } from '../../messages/entities/message.entity';
 import { MessageRead } from '../../messages/entities/message_reads.entity';
@@ -23,9 +24,11 @@ export class User {
   lastName: string;
 
   @Column()
+  @Index('IDX_USER_PHONE')
   phone: string;
 
   @Column()
+  @Index('IDX_USER_EMAIL', { unique: true })
   email: string;
 
   @Column({ nullable: true, default: null })
@@ -41,9 +44,11 @@ export class User {
   device_token: string;
 
   @Column({ default: false })
+  @Index('IDX_USER_IS_ONLINE')
   isOnline: boolean;
 
   @Column({ default: () => 'CURRENT_TIMESTAMP' })
+  @Index('IDX_USER_LAST_SEEN')
   lastSeen: Date;
 
   @Column({ nullable: true, default: null })

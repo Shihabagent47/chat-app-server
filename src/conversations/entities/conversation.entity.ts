@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Message } from '../../messages/entities/message.entity';
@@ -23,6 +24,7 @@ export class Conversation {
   @Column()
   name: string;
   @Column({ type: 'enum', enum: ConversationType })
+  @Index('IDX_CONVERSATION_TYPE')
   type: ConversationType;
 
   @Column({ nullable: true, default: null })
@@ -32,9 +34,11 @@ export class Conversation {
   description: string;
 
   @Column()
+  @Index('IDX_CONVERSATION_CREATED_BY')
   createdBy: string;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Index('IDX_CONVERSATION_CREATED_AT')
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

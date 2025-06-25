@@ -7,6 +7,7 @@ import {
   ManyToOne,
   OneToMany,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 import { Conversation } from '../../conversations/entities/conversation.entity';
@@ -14,20 +15,25 @@ import { Attachment } from './attachment.entity';
 import { MessageRead } from './message_reads.entity';
 
 @Entity()
+@Index('IDX_MESSAGE_CONVERSATION_CREATED_AT', ['conversationId', 'createdAt'])
+@Index('IDX_MESSAGE_SENDER_CREATED_AT', ['senderId', 'createdAt'])
 export class Message {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
   @Column()
+  @Index('IDX_MESSAGE_SENDER_ID')
   senderId: string;
 
   @Column()
   content: string;
 
   @Column()
+  @Index('IDX_MESSAGE_CONVERSATION_ID')
   conversationId: string;
 
   @Column({ nullable: true, default: null })
+  @Index('IDX_MESSAGE_REPLY_TO_MESSAGE_ID')
   replyToMessageId: string;
 
   @Column({ default: false })
@@ -37,6 +43,7 @@ export class Message {
   isDeleted: boolean;
 
   @CreateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
+  @Index('IDX_MESSAGE_CREATED_AT')
   createdAt: Date;
 
   @UpdateDateColumn({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })

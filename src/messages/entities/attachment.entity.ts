@@ -5,6 +5,7 @@ import {
   CreateDateColumn,
   ManyToOne,
   JoinColumn,
+  Index,
 } from 'typeorm';
 import { Message } from './message.entity';
 
@@ -14,12 +15,14 @@ export class Attachment {
   id: string;
 
   @Column()
+  @Index('IDX_ATTACHMENT_MESSAGE_ID')
   messageId: string;
 
   @Column()
   url: string;
 
   @Column()
+  @Index('IDX_ATTACHMENT_TYPE')
   type: string;
 
   @Column()
