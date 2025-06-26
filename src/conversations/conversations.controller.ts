@@ -27,13 +27,20 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ApiResponseDto } from '../common/dto/api-response.dto';
+import { MessagesService } from '../messages/messages.service';
+import { CreateMessageDto } from '../messages/dto/create-message.dto';
+import { GetMessagesQueryDto } from '../messages/dto/get-messages-query.dto';
+import { MessageResponseDto } from '../messages/dto/message-response.dto';
 
 @ApiTags('conversations')
 @Controller('conversations')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class ConversationsController {
-  constructor(private readonly conversationsService: ConversationsService) {}
+  constructor(
+    private readonly conversationsService: ConversationsService,
+    private readonly messagesService: MessagesService,
+  ) {}
 
   @Post()
   @ApiOperation({ summary: 'Create a new conversation' })
@@ -209,6 +216,75 @@ export class ConversationsController {
     return this.conversationsService.removeParticipant(
       conversationId,
       userId,
+      user.id,
+    );
+  }
+
+  // Message endpoints within conversations
+  @Get(':id/messages')
+  @ApiOperation({ summary: 'Get messages in a conversation' })
+  @ApiParam({ name: 'id', description: 'Conversation ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Messages retrieved successfully',
+    type: ApiResponseDto<MessageResponseDto[]>,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Conversation not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not a participant in this conversation',
+  })
+  async getMessages(
+    @Param('id') conversationId: string,
+    @Query() query: GetMessagesQueryDto,
+    @CurrentUser() user: User,
+  ): Promise<{
+    data: MessageResponseDto[];
+    meta: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+    };
+  }> {
+    return this.messagesService.findMessagesInConversation(
+      conversationId,
+      query,
+      user.id,
+    );
+  }
+
+  @Post(':id/messages')
+  @ApiOperation({ summary: 'Send a message in a conversation' })
+  @ApiParam({ name: 'id', description: 'Conversation ID' })
+  @ApiResponse({
+    status: HttpStatus.CREATED,
+    description: 'Message sent successfully',
+    type: MessageResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'Conversation not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.FORBIDDEN,
+    description: 'Not a participant in this conversation',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Invalid message data or reply message not found',
+  })
+  async sendMessage(
+    @Param('id') conversationId: string,
+    @Body() createMessageDto: CreateMessageDto,
+    @CurrentUser() user: User,
+  ): Promise<MessageResponseDto> {
+    return this.messagesService.createMessage(
+      conversationId,
+      createMessageDto,
       user.id,
     );
   }
