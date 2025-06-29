@@ -4,7 +4,7 @@ import { UsersService } from './users.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Participant } from './entities/participants.entity';
-import { FileUploadService } from 'src/common/files/fire-upload.service';
+import { FileUploadService } from '../common/files/fire-upload.service';
 
 @Module({
   imports: [TypeOrmModule.forFeature([User, Participant])],
@@ -12,4 +12,4 @@ import { FileUploadService } from 'src/common/files/fire-upload.service';
   providers: [UsersService, FileUploadService],
   exports: [UsersService, FileUploadService],
 })
-export class UsersModule {}
+export class UsersModule { }

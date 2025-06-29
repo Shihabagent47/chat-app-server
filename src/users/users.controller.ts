@@ -12,14 +12,14 @@ import {
   UploadedFile,
   BadRequestException,
 } from '@nestjs/common';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { UsersService } from './users.service';
 
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { profilePictureMulterConfig } from 'src/common/files/multer.config';
+import { profilePictureMulterConfig } from '../common/files/multer.config';
 import { File } from 'multer';
 import { FileUploadService } from '../common/files/fire-upload.service';
 import {
@@ -30,7 +30,7 @@ import {
   ApiOkResponse,
   ApiTags,
 } from '@nestjs/swagger';
-import { ApiResponseDto } from 'src/common/dto/api-response.dto';
+import { ApiResponseDto } from '../common/dto/api-response.dto';
 import { User } from './entities/user.entity';
 @ApiTags('users')
 @Controller('users')
@@ -38,7 +38,7 @@ export class UsersController {
   constructor(
     private readonly userService: UsersService,
     private readonly fileUploadService: FileUploadService,
-  ) {}
+  ) { }
 
   @Get('')
   @UseGuards(JwtAuthGuard)

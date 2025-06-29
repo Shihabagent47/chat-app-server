@@ -18,6 +18,7 @@ import {
   ParticipantRole,
 } from '../users/entities/participants.entity';
 import { User } from '../users/entities/user.entity';
+import { Message } from 'src/messages/entities/message.entity';
 
 @Injectable()
 export class ConversationsService {
@@ -28,7 +29,9 @@ export class ConversationsService {
     private participantRepository: Repository<Participant>,
     @InjectRepository(User)
     private userRepository: Repository<User>,
-  ) {}
+    @InjectRepository(Message)
+    private messageRepository: Repository<Message>,
+  ) { }
 
   async create(
     createConversationDto: CreateConversationDto,
@@ -119,6 +122,8 @@ export class ConversationsService {
     return this.findOne(savedConversation.id, currentUserId);
   }
 
+
+
   async findAll(
     query: GetConversationsQueryDto,
     currentUserId: string,
@@ -134,39 +139,59 @@ export class ConversationsService {
     const { page = 1, limit = 10, type } = query;
     const skip = (page - 1) * limit;
 
-    // Build query to find conversations where user is a participant
-    const queryBuilder = this.conversationRepository
+    // Build base query for conversations where user is a participant
+    const baseQueryBuilder = this.conversationRepository
       .createQueryBuilder('conversation')
-      .leftJoinAndSelect('conversation.participants', 'participant')
-      .leftJoinAndSelect('participant.user', 'participantUser')
+      .leftJoin('conversation.participants', 'participant')
+      .leftJoinAndSelect('conversation.participants', 'allParticipants')
+      .leftJoinAndSelect('allParticipants.user', 'participantUser')
       .leftJoinAndSelect('conversation.creator', 'creator')
-      .leftJoin('conversation.messages', 'message')
-      .leftJoinAndSelect(
-        'conversation.messages',
-        'lastMessage',
-        'lastMessage.id = (SELECT m.id FROM message m WHERE m.conversationId = conversation.id ORDER BY m.createdAt DESC LIMIT 1)',
-      )
-      .leftJoinAndSelect('lastMessage.sender', 'lastMessageSender')
-      .where(
-        'EXISTS (SELECT 1 FROM participant p WHERE p.conversationId = conversation.id AND p.userId = :userId)',
-        { userId: currentUserId },
-      );
+      .where('participant.userId = :userId', { userId: currentUserId });
 
     if (type) {
-      queryBuilder.andWhere('conversation.type = :type', { type });
+      baseQueryBuilder.andWhere('conversation.type = :type', { type });
     }
 
-    queryBuilder
-      .orderBy(
-        'COALESCE(lastMessage.createdAt, conversation.createdAt)',
-        'DESC',
-      )
+    // Get total count
+    const total = await baseQueryBuilder.getCount();
+
+    // Get conversations ordered by creation date first (fallback ordering)
+    const conversations = await baseQueryBuilder
+      .orderBy('conversation.createdAt', 'DESC')
       .skip(skip)
-      .take(limit);
+      .take(limit)
+      .getMany();
 
-    const [conversations, total] = await queryBuilder.getManyAndCount();
+    // Get last messages for each conversation and sort by last activity
+    const conversationsWithLastMessages = await Promise.all(
+      conversations.map(async (conversation) => {
+        const lastMessage = await this.messageRepository
+          .createQueryBuilder('message')
+          .leftJoinAndSelect('message.sender', 'sender')
+          .where('message.conversationId = :conversationId', {
+            conversationId: conversation.id
+          })
+          .orderBy('message.createdAt', 'DESC')
+          .limit(1)
+          .getOne();
 
-    const data = conversations.map((conversation) =>
+        if (lastMessage) {
+          conversation.messages = [lastMessage];
+        }
+
+        return {
+          conversation,
+          lastActivityTime: lastMessage?.createdAt || conversation.createdAt,
+        };
+      })
+    );
+
+    // Sort by last activity time (most recent first)
+    conversationsWithLastMessages.sort((a, b) =>
+      b.lastActivityTime.getTime() - a.lastActivityTime.getTime()
+    );
+
+    const data = conversationsWithLastMessages.map(({ conversation }) =>
       this.mapToResponseDto(conversation, currentUserId),
     );
 
@@ -194,7 +219,7 @@ export class ConversationsService {
       .leftJoinAndSelect(
         'conversation.messages',
         'lastMessage',
-        'lastMessage.id = (SELECT m.id FROM message m WHERE m.conversationId = conversation.id ORDER BY m.createdAt DESC LIMIT 1)',
+        'lastMessage.id = (SELECT id FROM message m WHERE conversationId = conversation.id ORDER BY m.createdAt DESC LIMIT 1)',
       )
       .leftJoinAndSelect('lastMessage.sender', 'lastMessageSender')
       .where('conversation.id = :id', { id })
@@ -472,14 +497,14 @@ export class ConversationsService {
         createdAt: participant.createdAt,
         user: participant.user
           ? {
-              id: participant.user.id,
-              firstName: participant.user.firstName,
-              lastName: participant.user.lastName,
-              email: participant.user.email,
-              profile_photo: participant.user.profile_photo,
-              isOnline: participant.user.isOnline,
-              lastSeen: participant.user.lastSeen,
-            }
+            id: participant.user.id,
+            firstName: participant.user.firstName,
+            lastName: participant.user.lastName,
+            email: participant.user.email,
+            profile_photo: participant.user.profile_photo,
+            isOnline: participant.user.isOnline,
+            lastSeen: participant.user.lastSeen,
+          }
           : undefined,
       }));
     }
@@ -494,9 +519,9 @@ export class ConversationsService {
         createdAt: lastMessage.createdAt,
         sender: lastMessage.sender
           ? {
-              firstName: lastMessage.sender.firstName,
-              lastName: lastMessage.sender.lastName,
-            }
+            firstName: lastMessage.sender.firstName,
+            lastName: lastMessage.sender.lastName,
+          }
           : undefined,
       };
     }

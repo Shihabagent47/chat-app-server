@@ -40,7 +40,7 @@ export class ConversationsController {
   constructor(
     private readonly conversationsService: ConversationsService,
     private readonly messagesService: MessagesService,
-  ) {}
+  ) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new conversation' })
