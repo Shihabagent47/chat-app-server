@@ -1,0 +1,100 @@
+### Register User 1
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "John",
+  "lastName": "Doe",
+  "email": "john.doe@test.com",
+  "password": "password123",
+  "phone": "+1234567890"
+}
+
+### Register User 2
+POST http://localhost:3000/auth/register
+Content-Type: application/json
+
+{
+  "firstName": "Jane",
+  "lastName": "Smith",
+  "email": "jane.smith@test.com",
+  "password": "password123",
+  "phone": "+1234567891"
+}
+
+### Login User 1
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "john.doe@test.com",
+  "password": "password123"
+}
+
+### Login User 2
+POST http://localhost:3000/auth/login
+Content-Type: application/json
+
+{
+  "email": "jane.smith@test.com",
+  "password": "password123"
+}
+
+### Create Group Conversation (replace with actual token)
+POST http://localhost:3000/conversations
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "name": "Test Group Chat",
+  "type": "group",
+  "description": "A test group conversation",
+  "participantIds": ["USER_2_ID_HERE"]
+}
+
+### Create Direct Conversation (replace with actual token and user ID)
+POST http://localhost:3000/conversations
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "name": "Direct Chat",
+  "type": "direct",
+  "participantIds": ["USER_2_ID_HERE"]
+}
+
+### Get All Conversations
+GET http://localhost:3000/conversations
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get Specific Conversation
+GET http://localhost:3000/conversations/CONVERSATION_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Update Conversation
+PUT http://localhost:3000/conversations/CONVERSATION_ID_HERE
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "name": "Updated Group Chat",
+  "description": "Updated description"
+}
+
+### Add Participant
+POST http://localhost:3000/conversations/CONVERSATION_ID_HERE/participants
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "userId": "USER_ID_HERE",
+  "role": "member"
+}
+
+### Remove Participant
+DELETE http://localhost:3000/conversations/CONVERSATION_ID_HERE/participants/USER_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Delete Conversation
+DELETE http://localhost:3000/conversations/CONVERSATION_ID_HERE
+Authorization: Bearer YOUR_TOKEN_HERE

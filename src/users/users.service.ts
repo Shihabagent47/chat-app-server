@@ -1,11 +1,11 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { User } from 'src/users/entities/user.entity';
+import { User } from '../users/entities/user.entity';
 import { Like, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 import { GetUsersQueryDto } from './dto/get-users-query.dto';
 import { UpdateStatusDto } from './dto/update-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { FileUploadService } from 'src/common/files/fire-upload.service';
+import { FileUploadService } from '../common/files/fire-upload.service';
 import { File } from 'multer';
 @Injectable()
 export class UsersService {
@@ -13,7 +13,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
-  ) {}
+  ) { }
 
   async findById(id: string) {
     const user = await this.userRepository.findOne({
@@ -28,10 +28,10 @@ export class UsersService {
     const skip = (page - 1) * pageSize;
     const whereCondition = query.q
       ? [
-          {
-            phone: Like(`%${query.q}%`),
-          },
-        ]
+        {
+          phone: Like(`%${query.q}%`),
+        },
+      ]
       : {};
 
     const [users, totalUsers] = await this.userRepository.findAndCount({

@@ -23,7 +23,8 @@
     "migration:revert": "typeorm-ts-node-commonjs migration:revert -d typeorm.config.ts",
     "migration:show": "typeorm-ts-node-commonjs migration:show -d typeorm.config.ts",
     "reset:db": "typeorm-ts-node-commonjs schema:drop -d typeorm.config.ts && typeorm-ts-node-commonjs migration:run -d typeorm.config.ts",
-    "reset": "npm run migration:revert && npm run migration:run"
+    "reset": "npm run migration:revert && npm run migration:run",
+    "seed": "ts-node src/seed/seed.ts"
   },
   "dependencies": {
     "@nestjs/common": "^11.0.1",

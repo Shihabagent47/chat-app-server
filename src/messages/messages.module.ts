@@ -5,9 +5,19 @@ import { MessagesController } from './messages.controller';
 import { Message } from './entities/message.entity';
 import { Attachment } from './entities/attachment.entity';
 import { MessageRead } from './entities/message_reads.entity';
+import { Conversation } from '../conversations/entities/conversation.entity';
+import { Participant } from '../users/entities/participants.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Message, Attachment, MessageRead])],
+  imports: [
+    TypeOrmModule.forFeature([
+      Message,
+      Attachment,
+      MessageRead,
+      Conversation,
+      Participant,
+    ]),
+  ],
   controllers: [MessagesController],
   providers: [MessagesService],
   exports: [MessagesService],
