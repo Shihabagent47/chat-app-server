@@ -12,4 +12,4 @@ import { FileUploadService } from '../common/files/fire-upload.service';
   providers: [UsersService, FileUploadService],
   exports: [UsersService, FileUploadService],
 })
-export class UsersModule { }
+export class UsersModule {}
