@@ -34,17 +34,27 @@ export class AuthService {
 
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
+    const accessTokenExpiresIn = 1 * 24 * 60 * 60 * 1000; // 1 day in ms
+    const expiresAt = new Date(Date.now() + accessTokenExpiresIn);
 
     // Update user with tokens
     await this.userRepository.update(user.id, {
       access_token: accessToken,
       refresh_token: refreshToken,
     });
+    const userResponse = {
+      id: user.id,
+      name: user.firstName + ' ' + user.lastName,
+      email: user.email,
+      profile_photo: user.profile_photo,
+    };
 
     return {
       message: 'Login successful',
       access_token: accessToken,
       refresh_token: refreshToken,
+      expires_at: expiresAt,
+      user: userResponse,
     };
   }
 
@@ -58,7 +68,7 @@ export class AuthService {
     };
   }
 
-  async register(registerDto: RegisterDto): Promise<User> {
+  async register(registerDto: RegisterDto): Promise<any> {
     const existingUser = await this.userRepository.findOne({
       where: [{ email: registerDto.email }, { phone: registerDto.phone }],
     });
@@ -68,7 +78,19 @@ export class AuthService {
     const hashedPassword = await bcryptjs.hash(registerDto.password, 10);
     registerDto.password = hashedPassword;
     const user = this.userRepository.create(registerDto);
-    return this.userRepository.save(user);
+    await this.userRepository.save(user);
+    const loginDto = {
+      email: registerDto.email,
+      password: registerDto.password,
+    };
+    const loginUser = await this.login(loginDto);
+    const userResponse = {
+      id: user.id,
+      name: user.firstName + ' ' + user.lastName,
+      email: user.email,
+      profile_photo: user.profile_photo,
+    };
+    return userResponse;
   }
 
   async refreshToken(user: User): Promise<any> {

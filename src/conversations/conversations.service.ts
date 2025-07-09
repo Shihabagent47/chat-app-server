@@ -31,7 +31,7 @@ export class ConversationsService {
     private userRepository: Repository<User>,
     @InjectRepository(Message)
     private messageRepository: Repository<Message>,
-  ) { }
+  ) {}
 
   async create(
     createConversationDto: CreateConversationDto,
@@ -122,8 +122,6 @@ export class ConversationsService {
     return this.findOne(savedConversation.id, currentUserId);
   }
 
-
-
   async findAll(
     query: GetConversationsQueryDto,
     currentUserId: string,
@@ -169,7 +167,7 @@ export class ConversationsService {
           .createQueryBuilder('message')
           .leftJoinAndSelect('message.sender', 'sender')
           .where('message.conversationId = :conversationId', {
-            conversationId: conversation.id
+            conversationId: conversation.id,
           })
           .orderBy('message.createdAt', 'DESC')
           .limit(1)
@@ -183,12 +181,12 @@ export class ConversationsService {
           conversation,
           lastActivityTime: lastMessage?.createdAt || conversation.createdAt,
         };
-      })
+      }),
     );
 
     // Sort by last activity time (most recent first)
-    conversationsWithLastMessages.sort((a, b) =>
-      b.lastActivityTime.getTime() - a.lastActivityTime.getTime()
+    conversationsWithLastMessages.sort(
+      (a, b) => b.lastActivityTime.getTime() - a.lastActivityTime.getTime(),
     );
 
     const data = conversationsWithLastMessages.map(({ conversation }) =>
@@ -497,14 +495,14 @@ export class ConversationsService {
         createdAt: participant.createdAt,
         user: participant.user
           ? {
-            id: participant.user.id,
-            firstName: participant.user.firstName,
-            lastName: participant.user.lastName,
-            email: participant.user.email,
-            profile_photo: participant.user.profile_photo,
-            isOnline: participant.user.isOnline,
-            lastSeen: participant.user.lastSeen,
-          }
+              id: participant.user.id,
+              firstName: participant.user.firstName,
+              lastName: participant.user.lastName,
+              email: participant.user.email,
+              profile_photo: participant.user.profile_photo,
+              isOnline: participant.user.isOnline,
+              lastSeen: participant.user.lastSeen,
+            }
           : undefined,
       }));
     }
@@ -519,9 +517,9 @@ export class ConversationsService {
         createdAt: lastMessage.createdAt,
         sender: lastMessage.sender
           ? {
-            firstName: lastMessage.sender.firstName,
-            lastName: lastMessage.sender.lastName,
-          }
+              firstName: lastMessage.sender.firstName,
+              lastName: lastMessage.sender.lastName,
+            }
           : undefined,
       };
     }

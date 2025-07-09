@@ -27,7 +27,7 @@ export class AuthController {
     type: ApiResponseDto<User>,
   })
   @Post('register')
-  async register(@Body() registerDto: RegisterDto): Promise<User> {
+  async register(@Body() registerDto: RegisterDto): Promise<any> {
     return this.authService.register(registerDto);
   }
 

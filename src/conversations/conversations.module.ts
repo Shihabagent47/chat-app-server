@@ -17,4 +17,4 @@ import { Message } from 'src/messages/entities/message.entity';
   providers: [ConversationsService],
   exports: [ConversationsService],
 })
-export class ConversationsModule { }
+export class ConversationsModule {}
