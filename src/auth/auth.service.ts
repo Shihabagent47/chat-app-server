@@ -78,6 +78,7 @@ export class AuthService {
     const hashedPassword = await bcryptjs.hash(registerDto.password, 10);
     registerDto.password = hashedPassword;
     const user = this.userRepository.create(registerDto);
+    await this.userRepository.save(user);
     const loginDto = {
       email: registerDto.email,
       password: registerDto.password,
