@@ -38,7 +38,7 @@ export class UsersController {
   constructor(
     private readonly userService: UsersService,
     private readonly fileUploadService: FileUploadService,
-  ) {}
+  ) { }
 
   @Get('')
   @UseGuards(JwtAuthGuard)
@@ -48,7 +48,9 @@ export class UsersController {
     description: 'Users retrieved successfully',
     type: ApiResponseDto<User[]>,
   })
-  async findAll(@Query() query: GetUsersQueryDto) {
+  async findAll(
+    @Query() query: GetUsersQueryDto,
+  ): Promise<ApiResponseDto<User[]>> {
     return this.userService.findAll(query);
   }
 
