@@ -34,8 +34,6 @@ export class AuthService {
 
     const accessToken = await this.generateAccessToken(user);
     const refreshToken = await this.generateRefreshToken(user);
-    const accessTokenExpiresIn = 1 * 24 * 60 * 60 * 1000; // 1 day in ms
-    const expiresAt = new Date(Date.now() + accessTokenExpiresIn);
 
     // Update user with tokens
     await this.userRepository.update(user.id, {
@@ -53,7 +51,6 @@ export class AuthService {
       message: 'Login successful',
       access_token: accessToken,
       refresh_token: refreshToken,
-      expires_at: expiresAt,
       user: userResponse,
     };
   }
@@ -75,22 +72,22 @@ export class AuthService {
     if (existingUser) {
       throw new Error('User already exists');
     }
+
+    // Store original password before hashing
+    const originalPassword = registerDto.password;
     const hashedPassword = await bcryptjs.hash(registerDto.password, 10);
     registerDto.password = hashedPassword;
+
     const user = this.userRepository.create(registerDto);
     await this.userRepository.save(user);
+
     const loginDto = {
       email: registerDto.email,
-      password: registerDto.password,
+      password: originalPassword, // Use original password, not hashed
     };
     const loginUser = await this.login(loginDto);
-    const userResponse = {
-      id: user.id,
-      name: user.firstName + ' ' + user.lastName,
-      email: user.email,
-      profile_photo: user.profile_photo,
-    };
-    return userResponse;
+
+    return loginUser;
   }
 
   async refreshToken(user: User): Promise<any> {
@@ -128,7 +125,7 @@ export class AuthService {
 
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '1h',
+      expiresIn: this.configService.get<string>('JWT_EXPIRES_IN') || '1m',
     });
   }
 
@@ -140,7 +137,7 @@ export class AuthService {
 
     return this.jwtService.signAsync(payload, {
       secret: this.configService.get<string>('JWT_SECRET'),
-      expiresIn: '7d', // Refresh tokens typically last longer
+      expiresIn: '1h', // Refresh tokens typically last longer
     });
   }
 }

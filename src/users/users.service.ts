@@ -7,13 +7,14 @@ import { UpdateStatusDto } from './dto/update-status.dto';
 import { UpdateProfileDto } from './dto/update-profile.dto';
 import { FileUploadService } from '../common/files/fire-upload.service';
 import { File } from 'multer';
+import { ResponseUtil } from '../common/utils/response.util';
 @Injectable()
 export class UsersService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
-  ) {}
+  ) { }
 
   async findById(id: string) {
     const user = await this.userRepository.findOne({
@@ -28,10 +29,10 @@ export class UsersService {
     const skip = (page - 1) * pageSize;
     const whereCondition = query.q
       ? [
-          {
-            phone: Like(`%${query.q}%`),
-          },
-        ]
+        {
+          phone: Like(`%${query.q}%`),
+        },
+      ]
       : {};
 
     const [users, totalUsers] = await this.userRepository.findAndCount({
@@ -48,8 +49,19 @@ export class UsersService {
       skip: skip,
       take: pageSize,
     });
+
     const totalPages = Math.ceil(totalUsers / pageSize);
-    return { page, totalUsers, pageSize, totalPages, data: users };
+
+    return ResponseUtil.successWithMeta(
+      users,
+      {
+        page,
+        limit: pageSize,
+        total: totalUsers,
+        pages: totalPages,
+      },
+      'Users retrieved successfully',
+    );
   }
 
   async updateStatus(
