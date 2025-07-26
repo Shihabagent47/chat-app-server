@@ -38,7 +38,7 @@ export class UsersController {
   constructor(
     private readonly userService: UsersService,
     private readonly fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
   @Get('')
   @UseGuards(JwtAuthGuard)

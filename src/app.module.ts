@@ -11,6 +11,8 @@ import { ServeStaticModule } from '@nestjs/serve-static';
 import { join } from 'path';
 import { ConversationsModule } from './conversations/conversations.module';
 import { MessagesModule } from './messages/messages.module';
+import { WebSocketModule } from './websocket/websocket.module';
+import { CallsModule } from './calls/calls.module';
 @Module({
   imports: [
     ServeStaticModule.forRoot({
@@ -27,6 +29,8 @@ import { MessagesModule } from './messages/messages.module';
     AuthModule,
     ConversationsModule,
     MessagesModule,
+    WebSocketModule,
+    CallsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

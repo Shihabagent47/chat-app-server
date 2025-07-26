@@ -18,7 +18,7 @@ import { ApiResponseDto } from '../common/dto/api-response.dto';
 @ApiTags('auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) { }
+  constructor(private readonly authService: AuthService) {}
 
   @Public()
   @ApiOperation({ summary: 'Create a new user' })

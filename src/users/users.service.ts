@@ -14,7 +14,7 @@ export class UsersService {
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
     private fileUploadService: FileUploadService,
-  ) { }
+  ) {}
 
   async findById(id: string) {
     const user = await this.userRepository.findOne({
@@ -29,10 +29,10 @@ export class UsersService {
     const skip = (page - 1) * pageSize;
     const whereCondition = query.q
       ? [
-        {
-          phone: Like(`%${query.q}%`),
-        },
-      ]
+          {
+            phone: Like(`%${query.q}%`),
+          },
+        ]
       : {};
 
     const [users, totalUsers] = await this.userRepository.findAndCount({

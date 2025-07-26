@@ -15,7 +15,7 @@ export class AuthService {
     private readonly userRepository: Repository<User>,
     private jwtService: JwtService,
     private configService: ConfigService,
-  ) { }
+  ) {}
 
   async login(loginDto: LoginDto): Promise<any> {
     const user = await this.userRepository.findOne({
