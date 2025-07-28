@@ -27,6 +27,7 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
 import { ApiResponseDto } from '../common/dto/api-response.dto';
+import { ResponseUtil } from '../common/utils/response.util';
 import { MessagesService } from '../messages/messages.service';
 import { CreateMessageDto } from '../messages/dto/create-message.dto';
 import { GetMessagesQueryDto } from '../messages/dto/get-messages-query.dto';
@@ -40,7 +41,7 @@ export class ConversationsController {
   constructor(
     private readonly conversationsService: ConversationsService,
     private readonly messagesService: MessagesService,
-  ) {}
+  ) { }
 
   @Post()
   @ApiOperation({ summary: 'Create a new conversation' })
@@ -74,16 +75,13 @@ export class ConversationsController {
   async findAll(
     @Query() query: GetConversationsQueryDto,
     @CurrentUser() user: User,
-  ): Promise<{
-    data: ConversationResponseDto[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  }> {
-    return this.conversationsService.findAll(query, user.id);
+  ): Promise<ApiResponseDto<ConversationResponseDto[]>> {
+    const result = await this.conversationsService.findAll(query, user.id);
+    return ResponseUtil.successWithMeta(
+      result.data,
+      result.meta,
+      'Data retrieved successfully',
+    );
   }
 
   @Get(':id')
@@ -241,19 +239,16 @@ export class ConversationsController {
     @Param('id') conversationId: string,
     @Query() query: GetMessagesQueryDto,
     @CurrentUser() user: User,
-  ): Promise<{
-    data: MessageResponseDto[];
-    meta: {
-      page: number;
-      limit: number;
-      total: number;
-      pages: number;
-    };
-  }> {
-    return this.messagesService.findMessagesInConversation(
+  ): Promise<ApiResponseDto<MessageResponseDto[]>> {
+    const result = await this.messagesService.findMessagesInConversation(
       conversationId,
       query,
       user.id,
+    );
+    return ResponseUtil.successWithMeta(
+      result.data,
+      result.meta,
+      'Data retrieved successfully',
     );
   }
 
