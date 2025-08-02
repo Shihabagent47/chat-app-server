@@ -129,6 +129,9 @@ export class ChatGateway
         lastSeen: new Date(),
       });
 
+
+      console.log('connected users', this.connectedUsers);
+
       this.logger.log(`Client ${client.id} connected: ${user.email}`);
     } catch (error) {
       this.logger.error(`Connection error: ${error}`);
