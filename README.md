@@ -19,103 +19,179 @@ A real-time chat application backend built with NestJS, TypeORM, PostgreSQL, and
 
 Please refer to [END_POINT.md](END_POINT.md) for the complete list of REST endpoints and WebSocket events.
 
-## Project Setup
+---
+
+## Running with Docker (Recommended)
+
+This is the easiest way to get up and running — no local PostgreSQL install needed.
 
 ### Prerequisites
 
-- Node.js (v18+)
-- PostgreSQL
+- [Docker Desktop](https://www.docker.com/products/docker-desktop/)
+
+### Steps
+
+**1. Copy the environment file**
+
+```bash
+cp .env.example .env
+```
+
+Update `.env` with your desired values (at minimum, set a strong `JWT_SECRET` and `DB_PASSWORD`):
+
+```env
+DB_HOST=localhost        # leave as-is; Docker overrides this automatically
+DB_PORT=5432
+DB_USERNAME=postgres
+DB_PASSWORD=yourpassword
+DB_DATABASE=chat-app
+NODE_ENV=development
+PORT=3000
+JWT_SECRET=your-secret-key
+JWT_EXPIRES_IN=1d
+```
+
+**2. Start all services**
+
+```bash
+docker compose up
+```
+
+This starts:
+- `api` — the NestJS app on port `3000` (with hot reload)
+- `db` — PostgreSQL 14 on port `5432`
+
+> First run will build the image and pull PostgreSQL, which takes a minute.
+
+**3. Run database migrations**
+
+In a separate terminal, once the containers are up:
+
+```bash
+docker compose exec api npm run migration:run
+```
+
+**4. Access the app**
+
+| Service        | URL                              |
+|----------------|----------------------------------|
+| REST API       | http://localhost:3000/api        |
+| Swagger docs   | http://localhost:3000/api-docs   |
+| PostgreSQL     | localhost:5432                   |
+
+**5. Stop the containers**
+
+```bash
+docker compose down
+```
+
+To also delete the database volume (fresh start):
+
+```bash
+docker compose down -v
+```
+
+### Common Docker commands
+
+```bash
+# View logs
+docker compose logs -f api
+
+# Restart just the API (after config changes)
+docker compose restart api
+
+# Open a shell inside the API container
+docker compose exec api sh
+
+# Run migrations
+docker compose exec api npm run migration:run
+
+# Revert last migration
+docker compose exec api npm run migration:revert
+```
+
+---
+
+## Running Locally (without Docker)
+
+### Prerequisites
+
+- Node.js v20+
+- PostgreSQL running locally
 - npm
 
-### Installation
+### Setup
+
+**1. Install dependencies**
 
 ```bash
-$ npm install
+npm install
 ```
 
-### Environment Configuration
-
-Copy the example environment file and update it with your settings:
+**2. Configure environment**
 
 ```bash
-$ cp .env.example .env
+cp .env.example .env
 ```
 
-### Database Migrations
+Update `.env` — keep `DB_HOST=localhost` for local development.
+
+**3. Run migrations**
 
 ```bash
-# generate a migration
-$ npm run migration:generate
+npm run migration:run
+```
 
-# run migrations
-$ npm run migration:run
+**4. Start the app**
 
-# revert migrations
-$ npm run migration:revert
+```bash
+# development with hot reload
+npm run start:dev
+
+# production
+npm run start:prod
+```
+
+---
+
+## Database Migrations
+
+```bash
+# generate a new migration (after changing entities)
+npm run migration:generate
+
+# run pending migrations
+npm run migration:run
+
+# revert last migration
+npm run migration:revert
 
 # show migration status
-$ npm run migration:show
-```
-
-## Running the Application
-
-```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run migration:show
 ```
 
 ## Testing
 
 ```bash
 # unit tests
-$ npm run test
+npm run test
 
 # e2e tests
-$ npm run test:e2e
+npm run test:e2e
 
 # test coverage
-$ npm run test:cov
-```
-
-## Docker Deployment
-
-This project includes Docker configuration for easy deployment:
-
-```bash
-# build and start containers
-$ docker-compose up -d
-
-# stop containers
-$ docker-compose down
+npm run test:cov
 ```
 
 ## API Documentation
 
-Once the application is running, you can access the Swagger API documentation at:
+Once the app is running, Swagger UI is available at:
 
 ```
 http://localhost:3000/api-docs
 ```
 
-### Swagger UI Preview
-
 ![Swagger API Documentation](docs/images/swagger-api-documentation.png)
-
-The interactive API documentation provides:
-- Complete endpoint documentation
-- Request/response schemas
-- Authentication examples
-- Try-it-out functionality for testing endpoints
-
-## WebSocket Events
-
-The application supports real-time communication through WebSocket events. See [END_POINT.md](END_POINT.md) for details on available events.
 
 ## Project Structure
 
@@ -131,7 +207,7 @@ docs/
 └── images/         # Documentation images and screenshots
 
 public/
-└── uploads/        # User uploaded files (profile pictures, attachments)
+└── uploads/        # User uploaded files
     ├── profile-pictures/
     ├── attachments/
     └── thumbnails/
