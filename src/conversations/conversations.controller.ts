@@ -31,6 +31,7 @@ import { MessagesService } from '../messages/messages.service';
 import { CreateMessageDto } from '../messages/dto/create-message.dto';
 import { GetMessagesQueryDto } from '../messages/dto/get-messages-query.dto';
 import { MessageResponseDto } from '../messages/dto/message-response.dto';
+import { ChatGateway } from '../chat/chat.gateway';
 
 @ApiTags('conversations')
 @Controller('conversations')
@@ -40,6 +41,7 @@ export class ConversationsController {
   constructor(
     private readonly conversationsService: ConversationsService,
     private readonly messagesService: MessagesService,
+    private readonly chatGateway: ChatGateway,
   ) {}
 
   @Post()
@@ -84,6 +86,29 @@ export class ConversationsController {
     };
   }> {
     return this.conversationsService.findAll(query, user.id);
+  }
+
+  @Post('direct/:userId')
+  @ApiOperation({ summary: 'Get or create a direct conversation with a user' })
+  @ApiParam({ name: 'userId', description: 'Target user ID' })
+  @ApiResponse({
+    status: HttpStatus.OK,
+    description: 'Direct conversation returned or created',
+    type: ConversationResponseDto,
+  })
+  @ApiResponse({
+    status: HttpStatus.NOT_FOUND,
+    description: 'User not found',
+  })
+  @ApiResponse({
+    status: HttpStatus.BAD_REQUEST,
+    description: 'Cannot start a conversation with yourself',
+  })
+  async getOrCreateDirect(
+    @Param('userId') targetUserId: string,
+    @CurrentUser() user: User,
+  ): Promise<ConversationResponseDto> {
+    return this.conversationsService.getOrCreateDirect(targetUserId, user.id);
   }
 
   @Get(':id')
@@ -282,10 +307,12 @@ export class ConversationsController {
     @Body() createMessageDto: CreateMessageDto,
     @CurrentUser() user: User,
   ): Promise<MessageResponseDto> {
-    return this.messagesService.createMessage(
+    const message = await this.messagesService.createMessage(
       conversationId,
       createMessageDto,
       user.id,
     );
+    this.chatGateway.broadcastNewMessage(conversationId, message);
+    return message;
   }
 }

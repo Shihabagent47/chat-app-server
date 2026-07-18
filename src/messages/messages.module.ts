@@ -7,6 +7,7 @@ import { Attachment } from './entities/attachment.entity';
 import { MessageRead } from './entities/message_reads.entity';
 import { Conversation } from '../conversations/entities/conversation.entity';
 import { Participant } from '../users/entities/participants.entity';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { Participant } from '../users/entities/participants.entity';
       Conversation,
       Participant,
     ]),
+    ChatModule,
   ],
   controllers: [MessagesController],
   providers: [MessagesService],

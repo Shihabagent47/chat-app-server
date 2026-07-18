@@ -30,8 +30,8 @@ export class Conversation {
   @Column({ nullable: true, default: null })
   photo: string;
 
-  @Column()
-  description: string;
+  @Column({ type: 'varchar', nullable: true, default: null })
+  description: string | null;
 
   @Column()
   @Index('IDX_CONVERSATION_CREATED_BY')

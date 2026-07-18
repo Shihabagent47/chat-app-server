@@ -214,7 +214,7 @@ export class MessagesService {
   async remove(
     id: string,
     currentUserId: string,
-  ): Promise<{ message: string }> {
+  ): Promise<{ message: string; conversationId: string; messageId: string }> {
     const message = await this.messageRepository.findOne({
       where: { id },
       relations: ['conversation', 'conversation.participants'],
@@ -224,12 +224,10 @@ export class MessagesService {
       throw new NotFoundException('Message not found');
     }
 
-    // Only the sender can delete their message
     if (message.senderId !== currentUserId) {
       throw new ForbiddenException('You can only delete your own messages');
     }
 
-    // Check if user is still a participant in the conversation
     const isParticipant = message.conversation.participants.some(
       (p) => p.userId === currentUserId,
     );
@@ -239,13 +237,15 @@ export class MessagesService {
       );
     }
 
-    // Soft delete - mark as deleted instead of removing from database
     message.isDeleted = true;
     message.updatedAt = new Date();
-
     await this.messageRepository.save(message);
 
-    return { message: 'Message deleted successfully' };
+    return {
+      message: 'Message deleted successfully',
+      conversationId: message.conversationId,
+      messageId: message.id,
+    };
   }
 
   async markAsRead(
@@ -290,7 +290,6 @@ export class MessagesService {
       };
     }
 
-    // Create new read record
     const messageRead = this.messageReadRepository.create({
       messageId,
       userId: currentUserId,
@@ -301,6 +300,8 @@ export class MessagesService {
     return {
       message: 'Message marked as read successfully',
       readAt: savedRead.readAt,
+      conversationId: message.conversationId,
+      messageId,
     };
   }
 

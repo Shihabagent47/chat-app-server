@@ -23,13 +23,17 @@ import { MarkReadResponseDto } from './dto/mark-read.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { User } from '../users/entities/user.entity';
+import { ChatGateway } from '../chat/chat.gateway';
 
 @ApiTags('messages')
 @Controller('messages')
 @UseGuards(JwtAuthGuard)
 @ApiBearerAuth('JWT-auth')
 export class MessagesController {
-  constructor(private readonly messagesService: MessagesService) {}
+  constructor(
+    private readonly messagesService: MessagesService,
+    private readonly chatGateway: ChatGateway,
+  ) {}
 
   @Get(':id')
   @ApiOperation({ summary: 'Get a specific message by ID' })
@@ -39,14 +43,8 @@ export class MessagesController {
     description: 'Message retrieved successfully',
     type: MessageResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Message not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'Not a participant in this conversation',
-  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Message not found' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'Not a participant in this conversation' })
   async findOne(
     @Param('id') id: string,
     @CurrentUser() user: User,
@@ -62,42 +60,31 @@ export class MessagesController {
     description: 'Message updated successfully',
     type: MessageResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Message not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'You can only edit your own messages',
-  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Message not found' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'You can only edit your own messages' })
   async update(
     @Param('id') id: string,
     @Body() updateMessageDto: UpdateMessageDto,
     @CurrentUser() user: User,
   ): Promise<MessageResponseDto> {
-    return this.messagesService.update(id, updateMessageDto, user.id);
+    const updated = await this.messagesService.update(id, updateMessageDto, user.id);
+    this.chatGateway.broadcastMessageUpdated(updated.conversationId, updated);
+    return updated;
   }
 
   @Delete(':id')
   @ApiOperation({ summary: 'Delete a message' })
   @ApiParam({ name: 'id', description: 'Message ID' })
-  @ApiResponse({
-    status: HttpStatus.OK,
-    description: 'Message deleted successfully',
-  })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Message not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.FORBIDDEN,
-    description: 'You can only delete your own messages',
-  })
+  @ApiResponse({ status: HttpStatus.OK, description: 'Message deleted successfully' })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Message not found' })
+  @ApiResponse({ status: HttpStatus.FORBIDDEN, description: 'You can only delete your own messages' })
   async remove(
     @Param('id') id: string,
     @CurrentUser() user: User,
   ): Promise<{ message: string }> {
-    return this.messagesService.remove(id, user.id);
+    const result = await this.messagesService.remove(id, user.id);
+    this.chatGateway.broadcastMessageDeleted(result.conversationId, result.messageId);
+    return { message: result.message };
   }
 
   @Post(':id/read')
@@ -108,18 +95,20 @@ export class MessagesController {
     description: 'Message marked as read successfully',
     type: MarkReadResponseDto,
   })
-  @ApiResponse({
-    status: HttpStatus.NOT_FOUND,
-    description: 'Message not found',
-  })
-  @ApiResponse({
-    status: HttpStatus.BAD_REQUEST,
-    description: 'Cannot mark your own messages as read',
-  })
+  @ApiResponse({ status: HttpStatus.NOT_FOUND, description: 'Message not found' })
+  @ApiResponse({ status: HttpStatus.BAD_REQUEST, description: 'Cannot mark your own messages as read' })
   async markAsRead(
     @Param('id') id: string,
     @CurrentUser() user: User,
   ): Promise<MarkReadResponseDto> {
-    return this.messagesService.markAsRead(id, user.id);
+    const result = await this.messagesService.markAsRead(id, user.id);
+    if (result.conversationId && result.readAt) {
+      this.chatGateway.broadcastMessageRead(result.conversationId, {
+        messageId: id,
+        userId: user.id,
+        readAt: result.readAt,
+      });
+    }
+    return result;
   }
 }

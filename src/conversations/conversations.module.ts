@@ -7,11 +7,13 @@ import { Participant } from '../users/entities/participants.entity';
 import { User } from '../users/entities/user.entity';
 import { MessagesModule } from '../messages/messages.module';
 import { Message } from 'src/messages/entities/message.entity';
+import { ChatModule } from '../chat/chat.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Conversation, Participant, User, Message]),
     MessagesModule,
+    ChatModule,
   ],
   controllers: [ConversationsController],
   providers: [ConversationsService],

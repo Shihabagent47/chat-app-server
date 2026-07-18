@@ -6,4 +6,10 @@ export class MarkReadResponseDto {
 
   @ApiPropertyOptional({ example: '2024-01-01T00:00:00.000Z' })
   readAt?: Date;
+
+  @ApiPropertyOptional()
+  conversationId?: string;
+
+  @ApiPropertyOptional()
+  messageId?: string;
 }

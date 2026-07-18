@@ -213,11 +213,10 @@ export class ConversationsService {
       .leftJoinAndSelect('conversation.participants', 'participant')
       .leftJoinAndSelect('participant.user', 'participantUser')
       .leftJoinAndSelect('conversation.creator', 'creator')
-      .leftJoin('conversation.messages', 'message')
       .leftJoinAndSelect(
         'conversation.messages',
         'lastMessage',
-        'lastMessage.id = (SELECT id FROM message m WHERE conversationId = conversation.id ORDER BY m.createdAt DESC LIMIT 1)',
+        'lastMessage.id = (SELECT id FROM message m WHERE m."conversationId" = conversation.id ORDER BY m."createdAt" DESC LIMIT 1)',
       )
       .leftJoinAndSelect('lastMessage.sender', 'lastMessageSender')
       .where('conversation.id = :id', { id })
@@ -443,6 +442,52 @@ export class ConversationsService {
     return this.findOne(conversationId, currentUserId);
   }
 
+  async getOrCreateDirect(
+    targetUserId: string,
+    currentUserId: string,
+  ): Promise<ConversationResponseDto> {
+    if (targetUserId === currentUserId) {
+      throw new BadRequestException('You cannot start a conversation with yourself');
+    }
+
+    const targetUser = await this.userRepository.findOne({
+      where: { id: targetUserId },
+    });
+    if (!targetUser) {
+      throw new NotFoundException('User not found');
+    }
+
+    const existing = await this.findDirectConversationBetweenUsers(
+      currentUserId,
+      targetUserId,
+    );
+    if (existing) {
+      return this.findOne(existing.id, currentUserId);
+    }
+
+    const conversation = this.conversationRepository.create({
+      type: ConversationType.DIRECT,
+      name: `${targetUser.firstName} ${targetUser.lastName}`,
+      createdBy: currentUserId,
+    });
+    const saved = await this.conversationRepository.save(conversation);
+
+    await this.participantRepository.save([
+      this.participantRepository.create({
+        conversationId: saved.id,
+        userId: currentUserId,
+        role: ParticipantRole.ADMIN,
+      }),
+      this.participantRepository.create({
+        conversationId: saved.id,
+        userId: targetUserId,
+        role: ParticipantRole.MEMBER,
+      }),
+    ]);
+
+    return this.findOne(saved.id, currentUserId);
+  }
+
   private async findDirectConversationBetweenUsers(
     userId1: string,
     userId2: string,
@@ -467,7 +512,7 @@ export class ConversationsService {
       id: conversation.id,
       name: conversation.name,
       type: conversation.type,
-      description: conversation.description,
+      description: conversation.description ?? undefined,
       photo: conversation.photo,
       createdBy: conversation.createdBy,
       createdAt: conversation.createdAt,

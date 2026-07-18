@@ -23,6 +23,21 @@ export class ResponseInterceptor<T>
           return data;
         }
 
+        // Unwrap paginated responses so meta sits alongside data at the top level
+        if (
+          data &&
+          typeof data === 'object' &&
+          'data' in data &&
+          'meta' in data
+        ) {
+          return {
+            success: true,
+            data: data.data,
+            meta: data.meta,
+            message: this.getSuccessMessage(context),
+          };
+        }
+
         // Transform the response
         return {
           success: true,
